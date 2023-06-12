@@ -1,0 +1,20 @@
+cd front-end
+docker build -t scapp-front-end .
+
+cd ../back-end/storage
+docker build -t scapp-db .
+
+cd ../products
+docker build -t scapp-products .
+
+cd ../users
+docker build -t scapp-auth .
+
+cd ../purchase
+docker build -t scapp-purchase .
+
+cd ../logging
+docker build -t scapp-logs .
+
+cd ../recommendation
+docker build -t scapp-recommendations .

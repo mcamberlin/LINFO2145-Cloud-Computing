@@ -1,0 +1,68 @@
+[
+  {
+    "_id": "aa12f24f-3640-4005-a489-b89ae9ca5a66",
+    "colId": "a332cc8b-e275-4fa7-b639-46d154a6ccbf",
+    "containerId": "",
+    "name": "POST userlog no username",
+    "url": "http://192.168.64.13:3005/userlog",
+    "method": "POST",
+    "sortNum": 10000,
+    "created": "2022-11-03T15:15:43.464Z",
+    "modified": "2022-11-03T15:16:18.333Z",
+    "headers": [],
+    "params": [],
+    "tests": []
+  },
+  {
+    "_id": "9314b3f2-3b7c-4eef-a9a8-2bc44af18b00",
+    "colId": "a332cc8b-e275-4fa7-b639-46d154a6ccbf",
+    "containerId": "",
+    "name": "POST userlog no userEvent",
+    "url": "http://192.168.64.13:3005/userlog",
+    "method": "POST",
+    "sortNum": 20000,
+    "created": "2022-11-03T15:15:51.515Z",
+    "modified": "2022-11-03T15:16:50.375Z",
+    "headers": [],
+    "params": [],
+    "body": {
+      "type": "json",
+      "raw": "{\n  \"username\":\"thomas\"\n}",
+      "form": []
+    },
+    "tests": []
+  },
+  {
+    "_id": "d29803db-8f89-45cf-9cf5-a605302a9768",
+    "colId": "a332cc8b-e275-4fa7-b639-46d154a6ccbf",
+    "containerId": "",
+    "name": "POST userlog success",
+    "url": "http://192.168.64.13:3005/userlog",
+    "method": "POST",
+    "sortNum": 30000,
+    "created": "2022-11-03T15:16:54.198Z",
+    "modified": "2022-11-03T15:42:37.506Z",
+    "headers": [],
+    "params": [],
+    "body": {
+      "type": "json",
+      "raw": "{\n  \"username\":\"thomas\",\n  \"userEvent\":{\n    \"eventType\":\"pageViewed\",\n    \"eventTime\": 1666788707000,\n    \"eventData\":{\n      \"coucou\":\"toto\"\n    }\n  }\n}",
+      "form": []
+    },
+    "tests": []
+  },
+  {
+    "_id": "4e0a7b30-81ce-42fb-8db0-e30342a7c85c",
+    "colId": "a332cc8b-e275-4fa7-b639-46d154a6ccbf",
+    "containerId": "",
+    "name": "GET userlog thomas",
+    "url": "http://192.168.64.13:3005/userlog/thomas",
+    "method": "GET",
+    "sortNum": 20000,
+    "created": "2022-11-03T15:53:39.495Z",
+    "modified": "2022-11-03T15:53:53.033Z",
+    "headers": [],
+    "params": [],
+    "tests": []
+  }
+]

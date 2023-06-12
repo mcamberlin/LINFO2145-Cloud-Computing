@@ -1,0 +1,23 @@
+{
+  "scripts": {
+    "start": "gulp --gulpfile gulpfile.js"
+  },
+  "dependencies": {
+    "debug": "2.6.6",
+
+    "express": "4.15.2",
+    "body-parser": "1.17.1",
+    "morgan": "1.8.1",
+
+    "bcryptjs": "2.3.0",
+    "jwt-simple": "0.5.0",
+    "moment": "2.15.2",
+    "nano": "6.4.3",
+
+    "gulp": "4.0.2",
+    "gulp-nodemon": "2.5.0"
+  },
+  "overrides": {
+    "graceful-fs": "^4.2.10"
+  }
+}

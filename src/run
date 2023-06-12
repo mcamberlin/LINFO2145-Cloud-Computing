@@ -1,0 +1,49 @@
+# Stop and remove previous docker containers
+
+# scapp-recommendations
+docker stop scapp-recommendations && docker rm scapp-recommendations
+
+# scapp-logs, db-logs
+docker stop scapp-logs && docker rm scapp-logs
+docker stop logs-db && docker rm logs-db
+
+# scapp-products, db-products
+docker stop scapp-products && docker rm scapp-products
+docker stop products-db && docker rm products-db
+
+# scapp-purchase, db-purchase
+docker stop scapp-purchase && docker rm scapp-purchase
+docker stop purchase-db && docker rm purchase-db
+
+#scapp-auth, db-users
+docker stop scapp-auth && docker rm scapp-auth
+docker stop users-db && docker rm users-db
+
+# scapp-fe
+docker stop scapp-fe && docker rm scapp-fe
+
+
+
+# Run all services and their corresponding database
+
+#scapp-recommendations
+docker run -d -p 3009:80 --name scapp-recommendations scapp-recommendations
+
+# scapp-products, db-products
+docker run -d -p 3008:5984 --name products-db scapp-db
+docker run -d -p 3007:80 --name scapp-products --link products-db scapp-products
+
+# scapp-logs, db-logs
+docker run -d -p 3006:5984 --name logs-db  scapp-db
+docker run -d -p 3005:80 --name scapp-logs --link logs-db scapp-logs
+
+# scapp-purchase, db-purchase
+docker run -d -p 3004:5984 --name purchase-db  scapp-db
+docker run -d -p 3003:80 --name scapp-purchase --link purchase-db scapp-purchase
+
+#scapp-auth, db-users
+docker run -d -p 3002:5984 --name users-db scapp-db
+docker run -d -p 3001:80 --name scapp-auth --link users-db scapp-auth
+
+# scapp-fe
+docker run -d -p 3000:80 --name scapp-fe scapp-front-end

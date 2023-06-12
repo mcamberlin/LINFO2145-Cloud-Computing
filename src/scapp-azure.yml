@@ -1,0 +1,149 @@
+version: "3"
+services: # list all services for your application
+  # database of users
+  users-db:
+    # image name
+    image: mcamberlin/scapp-db:latest
+    ports: ["3002:5984"]
+    deploy:
+      # deploy only one instance of this service
+      replicas: 1
+      restart_policy:
+        # restart if something went wrong
+        condition: on-failure
+    networks: ["scapp-net"]
+  # server that listens HTTP requests
+  users-daemon:
+    image: mcamberlin/scapp-auth:latest
+    # link both services (same effect of option --link in docker run)
+    depends_on: ["users-db"]
+    # expose port number 3001 of host running this service
+    ports: ["3001:80"]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks: ["scapp-net"]
+
+  # database of purchases
+  products-db:
+    # image name
+    image: mcamberlin/scapp-db:latest
+    ports: ["3008:5984"]
+    deploy:
+      # deploy only one instance of this service
+      replicas: 1
+      restart_policy:
+        # restart if something went wrong
+        condition: on-failure
+    networks: ["scapp-net"]
+  # server that listens HTTP requests
+  products-daemon:
+    image: mcamberlin/scapp-products:latest
+    # link both services (same effect of option --link in docker run)
+    depends_on: ["products-db"]
+    # expose port number 3007 of host running this service
+    ports: ["3007:80"]
+    environment:
+      - DB_HOST=products-db
+      - AZURE_SAS=?sp=racwdli&st=2022-11-23T12:13:22Z&se=2023-11-23T20:13:22Z&sv=2021-06-08&sr=c&sig=5Aybai7pC5ApwrHx1AS5at%2BS97hVsnR4z7KWS1aLXjQ%3D
+      - AZURE_ACCOUNT=ery4zproduct
+      - AZURE_CONTAINER_NAME=scapp-images
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks: ["scapp-net"]
+
+  # database of purchases
+  purchase-db:
+    # image name
+    image: mcamberlin/scapp-db:latest
+    ports: ["3004:5984"]
+    deploy:
+      # deploy only one instance of this service
+      replicas: 1
+      restart_policy:
+        # restart if something went wrong
+        condition: on-failure
+    networks: ["scapp-net"]
+  # server that listens HTTP requests
+  purchase-daemon:
+    image: mcamberlin/scapp-purchase:latest
+    # link both services (same effect of option --link in docker run)
+    depends_on: ["purchase-db"]
+    # expose port number 3003 of host running this service
+    ports: ["3003:80"]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks: ["scapp-net"]
+
+  logs-db:
+    # image name
+    image: mcamberlin/scapp-db:latest
+    ports: ["3006:5984"]
+    deploy:
+      # deploy only one instance of this service
+      replicas: 1
+      restart_policy:
+        # restart if something went wrong
+        condition: on-failure
+    networks: ["scapp-net"]
+  logs-daemon:
+    image: mcamberlin/scapp-logs:latest
+    # link both services (same effect of option --link in docker run)
+    depends_on: ["logs-db"]
+    # expose port number 3005 of host running this service
+    ports: ["3005:80"]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks: ["scapp-net"]
+
+  # server that listens HTTP requests
+  recommendations-daemon:
+    image: mcamberlin/scapp-recommendations:latest   
+    depends_on: ["logs-daemon", "purchase-daemon"]           
+    # link both services (same effect of option --link in docker run)
+    # expose port number 3007 of host running this service
+    ports: [ "3009:80" ]                    
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks: ["scapp-net"]
+  
+  scapp-fe:
+    image: mcamberlin/scapp-front-end:latest
+    ports: ["3000:80"]
+    environment:
+      - REACT_APP_AUTH_SERVICE_URL=http://swarm-master-test-ery4z.westeurope.cloudapp.azure.com:3001
+      - REACT_APP_PURCHASE_SERVICE_URL=http://swarm-master-test-ery4z.westeurope.cloudapp.azure.com:3003
+      - REACT_APP_LOG_SERVICE_URL=http://swarm-master-test-ery4z.westeurope.cloudapp.azure.com:3005
+      - REACT_APP_PRODUCTS_SERVICE_URL=http://swarm-master-test-ery4z.westeurope.cloudapp.azure.com:3007
+      - REACT_APP_RECOMMENDATIONS_SERVICE_URL=http://swarm-master-test-ery4z.westeurope.cloudapp.azure.com:3009
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks: ["scapp-net"]
+
+  # Docker GUI for swarms
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports: ["80:8080"]
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      # locate this service in the swarm manager
+      placement:
+        constraints:
+          - node.role == manager
+    networks: ["scapp-net"]
+
+networks:
+  scapp-net:
+    external: true

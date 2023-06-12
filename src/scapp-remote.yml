@@ -1,0 +1,144 @@
+version: "3"
+services: # list all services for your application
+  # database of users
+  users-db:
+    # image name
+    image: mcamberlin/scapp-db:latest
+    ports: ["3002:5984"]
+    deploy:
+      # deploy only one instance of this service
+      replicas: 1
+      restart_policy:
+        # restart if something went wrong
+        condition: on-failure
+    networks: ["scapp-net"]
+  # server that listens HTTP requests
+  users-daemon:
+    image: mcamberlin/scapp-auth:latest
+    # link both services (same effect of option --link in docker run)
+    depends_on: ["users-db"]
+    # expose port number 3001 of host running this service
+    ports: ["3001:80"]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks: ["scapp-net"]
+
+  # database of purchases
+  purchase-db:
+    # image name
+    image: mcamberlin/scapp-db:latest
+    ports: ["3004:5984"]
+    deploy:
+      # deploy only one instance of this service
+      replicas: 1
+      restart_policy:
+        # restart if something went wrong
+        condition: on-failure
+    networks: ["scapp-net"]
+  # server that listens HTTP requests
+  purchase-daemon:
+    image: mcamberlin/scapp-purchase:latest
+    # link both services (same effect of option --link in docker run)
+    depends_on: ["purchase-db"]
+    # expose port number 3003 of host running this service
+    ports: ["3003:80"]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks: ["scapp-net"]
+
+  logs-db:
+    # image name
+    image: mcamberlin/scapp-db:latest
+    ports: ["3006:5984"]
+    deploy:
+      # deploy only one instance of this service
+      replicas: 1
+      restart_policy:
+        # restart if something went wrong
+        condition: on-failure
+    networks: ["scapp-net"]
+  logs-daemon:
+    image: mcamberlin/scapp-logs:latest
+    # link both services (same effect of option --link in docker run)
+    depends_on: ["logs-db"]
+    # expose port number 3005 of host running this service
+    ports: ["3005:80"]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks: ["scapp-net"]
+
+  # database of purchases
+  products-db:
+    # image name
+    image: mcamberlin/scapp-db:latest
+    ports: ["3008:5984"]
+    deploy:
+      # deploy only one instance of this service
+      replicas: 1
+      restart_policy:
+        # restart if something went wrong
+        condition: on-failure
+    networks: ["scapp-net"]
+  # server that listens HTTP requests
+  products-daemon:
+    image: mcamberlin/scapp-products:latest
+    depends_on: ["logs-daemon", "purchase-daemon"]
+    # link both services (same effect of option --link in docker run)
+    depends_on: ["products-db"]
+    # expose port number 3007 of host running this service
+    ports: ["3007:80"]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks: ["scapp-net"]
+
+  # server that listens HTTP requests
+  recommendations-daemon:
+    image: mcamberlin/scapp-recommendations:latest
+    # link both services (same effect of option --link in docker run)
+    # expose port number 3007 of host running this service
+    ports: ["3009:80"]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks: ["scapp-net"]
+  scapp-fe:
+    image: mcamberlin/scapp-front-end:latest
+    ports: ["3000:80"]
+    depends_on: ["scapp-logs"]
+    environment:
+      - REACT_APP_AUTH_SERVICE_URL=http://192.168.56.102:3001
+      - REACT_APP_PURCHASE_SERVICE_URL=http://192.168.56.102:3003
+      - REACT_APP_LOG_SERVICE_URL=http://192.168.56.102:3005
+      - REACT_APP_PRODUCTS_SERVICE_URL=http://192.168.56.102:3007
+      - REACT_APP_RECOMMENDATIONS_SERVICE_URL=http://192.168.56.102:3009
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks: ["scapp-net"]
+
+  # Docker GUI for swarms
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports: ["8080:8080"]
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      # locate this service in the swarm manager
+      placement:
+        constraints:
+          - node.role == manager
+    networks: ["scapp-net"]
+
+networks:
+  scapp-net:
+    external: true
